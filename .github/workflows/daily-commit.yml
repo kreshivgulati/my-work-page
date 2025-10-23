@@ -2,8 +2,8 @@ name: Daily Auto Commit
 
 on:
   schedule:
-    - cron: '30 14 * * *'  # Runs daily at 14:30 UTC (8:00 PM IST)
-  workflow_dispatch:        # Allows manual triggering
+    - cron: '30 14 * * *'  # Runs daily at 14:30 UTC
+  workflow_dispatch:
 
 jobs:
   daily-commit:
@@ -22,14 +22,15 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "24f2000880@ds.study.iitm.ac.in"
         
-    - name: Create timestamp file
+    - name: Create or update timestamp file
       run: |
-        echo "Automated commit timestamp: $(date -u)" > automated-commit.txt
-        echo "Workflow run ID: ${{ github.run_id }}" >> automated-commit.txt
-        echo "Triggered by: ${{ github.event_name }}" >> automated-commit.txt
+        echo "Last automated commit: $(date -u)" > automated-commit.txt
+        echo "Run ID: ${{ github.run_id }}" >> automated-commit.txt
+        cat automated-commit.txt
         
     - name: Commit and push changes
       run: |
         git add automated-commit.txt
-        git commit -m "🤖 Automated daily commit - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || exit 0
+        git status
+        git commit -m "🤖 Automated commit - $(date -u '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
         git push
