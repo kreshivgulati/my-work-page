@@ -6,29 +6,20 @@ on:
   workflow_dispatch:
 
 jobs:
-  daily-commit:
+  commit:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    
     steps:
-    - name: Checkout repository step with 24f2000880@ds.study.iitm.ac.in
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout repo with 24f2000880@ds.study.iitm.ac.in
+        uses: actions/checkout@v4
         
-    - name: Configure Git with 24f2000880@ds.study.iitm.ac.in
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "24f2000880@ds.study.iitm.ac.in"
-        
-    - name: Update timestamp file
-      run: |
-        date -u > automated-commit.txt
-        echo "Workflow run: ${{ github.run_id }}" >> automated-commit.txt
-        
-    - name: Commit and push changes
-      run: |
-        git add automated-commit.txt
-        git diff --staged --quiet || git commit -m "🤖 Daily auto-commit: $(date -u)"
-        git push
+      - name: Setup Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "24f2000880@ds.study.iitm.ac.in"
+          
+      - name: Make daily commit
+        run: |
+          echo "Last update: $(date)" > daily.txt
+          git add daily.txt
+          git commit -m "📅 Daily automated commit" || exit 0
+          git push
