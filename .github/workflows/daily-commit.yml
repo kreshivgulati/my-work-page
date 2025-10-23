@@ -2,24 +2,34 @@ name: Daily Auto Commit
 
 on:
   schedule:
-    - cron: '0 12 * * *'
-  workflow_dispatch:
+    - cron: '30 14 * * *'  # Runs daily at 14:30 UTC (8:00 PM IST)
+  workflow_dispatch:        # Allows manual triggering
 
 jobs:
-  commit:
+  daily-commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
     steps:
-      - name: Checkout repo with 24f2000880@ds.study.iitm.ac.in
-        uses: actions/checkout@v4
+    - name: Checkout repository with 24f2000880@ds.study.iitm.ac.in
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         
-      - name: Setup Git
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "24f2000880@ds.study.iitm.ac.in"
-          
-      - name: Make daily commit
-        run: |
-          echo "Last update: $(date)" > daily.txt
-          git add daily.txt
-          git commit -m "📅 Daily automated commit" || exit 0
-          git push
+    - name: Configure Git with email 24f2000880@ds.study.iitm.ac.in
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "24f2000880@ds.study.iitm.ac.in"
+        
+    - name: Create timestamp file
+      run: |
+        echo "Automated commit timestamp: $(date -u)" > automated-commit.txt
+        echo "Workflow run ID: ${{ github.run_id }}" >> automated-commit.txt
+        echo "Triggered by: ${{ github.event_name }}" >> automated-commit.txt
+        
+    - name: Commit and push changes
+      run: |
+        git add automated-commit.txt
+        git commit -m "🤖 Automated daily commit - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || exit 0
+        git push
